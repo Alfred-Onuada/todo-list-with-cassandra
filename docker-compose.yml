@@ -5,25 +5,27 @@ services:
       dockerfile: Dockerfile
     environment:
       - API_PORT=9990
+      - CASSANDRA_HOST=cassandra
     depends_on:
-      - cassandra
+      cassandra:
+        condition: service_healthy
     ports:
       - "9990:9990"
-    develop:
-      watch:
-        - action: sync
-          path: ./api
-          target: /api
-          ignore:
-            - go.sum
-        - action: rebuild
-          path: ./api/go.mod
+    volumes:
+      - ./api:/api
 
   cassandra:
     image: cassandra:latest
     ports:
       - "9042:9042"
-    environment:
-      - CASSANDRA_HOST=localhost
+    healthcheck:
+      test: ["CMD", "cqlsh", "-e", "SELECT NOW() FROM system.local"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - ./cassandra-data:/var/lib/cassandra
+
+networks:
+  default:
+    driver: bridge 

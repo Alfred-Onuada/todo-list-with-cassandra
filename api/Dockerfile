@@ -16,5 +16,7 @@ RUN go install github.com/air-verse/air@latest
 # Copy the rest of the source
 COPY . .
 
+EXPOSE 9990
+
 # Run the app
 CMD ["air"]

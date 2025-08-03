@@ -15,10 +15,11 @@ type DBConnection struct {
 var db *DBConnection
 
 func Connect() {
-	fmt.Println("Connecting to the Cassandra DB")
+	dbAddress := os.Getenv("CASSANDRA_HOST")
+	fmt.Println("Connecting to the Cassandra DB at", dbAddress)
 
 	db = &DBConnection{}
-	db.connection = gocql.NewCluster(os.Getenv("CASSANDRA_HOST"))
+	db.connection = gocql.NewCluster(dbAddress)
 	db.connection.Keyspace = "todo_db"
 	db.connection.Consistency = gocql.Quorum
 
