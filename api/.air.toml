@@ -1,0 +1,27 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+bin = "./tmp/main"
+cmd = "go build -o ./tmp/main ./cmd/main.go"
+delay = 1000
+log = "./tmp/build-errors.log"
+
+[color]
+build = "yellow"
+main = "magenta"
+runner = "green"
+watcher = "cyan"
+
+[log]
+main_only = false
+silent = false
+time = false
+
+[misc]
+clean_on_exit = true
+env_file = ".env"
+
+[screen]
+clear_on_rebuild = false
+keep_scroll = false

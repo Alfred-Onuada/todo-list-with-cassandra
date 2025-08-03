@@ -1,0 +1,29 @@
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    environment:
+      - API_PORT=9990
+    depends_on:
+      - cassandra
+    ports:
+      - "9990:9990"
+    develop:
+      watch:
+        - action: sync
+          path: ./api
+          target: /api
+          ignore:
+            - go.sum
+        - action: rebuild
+          path: ./api/go.mod
+
+  cassandra:
+    image: cassandra:latest
+    ports:
+      - "9042:9042"
+    environment:
+      - CASSANDRA_HOST=localhost
+    volumes:
+      - ./cassandra-data:/var/lib/cassandra
