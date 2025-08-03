@@ -6,29 +6,12 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Alfred-Onuada/todo-list-with-cassandra.git/pkg/db"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
-type Priority string
-
-var (
-	CasualPriority    Priority = "casual"
-	ImportantPriority Priority = "important"
-)
-
-type Todos struct {
-	ID        string    `json:"id"`
-	Content   string    `json:"content"`
-	Due       time.Time `json:"due"`
-	Priority  Priority  `json:"priority"`
-	Completed bool      `json:"completed"`
-}
-
-// holds my current todos
-var todos []Todos = []Todos{}
-
-func HeatlhCheck(c *gin.Context) {
+func HealthCheck(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": fmt.Sprintf(
 			"Welcome to my todos API, the goal of this is to play with Gin and Cassandra DB, the current time is %s",
@@ -38,6 +21,16 @@ func HeatlhCheck(c *gin.Context) {
 }
 
 func GetTodos(c *gin.Context) {
+	// fetch the todos
+	todos, err := db.GetTodos()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Internal Server Error",
+			"error":   err.Error(),
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Todos retrieved successfully",
 		"data":    todos,
@@ -47,15 +40,23 @@ func GetTodos(c *gin.Context) {
 func GetTodo(c *gin.Context) {
 	id := c.Param("id")
 
-	todo := Todos{}
-	for _, t := range todos {
-		if t.ID == id {
-			todo = t
-			break
-		}
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid ID",
+			"error":   "ID param can not be empty",
+		})
 	}
 
-	if todo.ID == "" {
+	todo, err := db.GetTodoByID(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Internal Server Error",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if todo == nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"message": "Todo not found",
 		})
@@ -69,7 +70,7 @@ func GetTodo(c *gin.Context) {
 }
 
 func CreateTodo(c *gin.Context) {
-	var todo Todos
+	var todo db.Todo
 	if err := c.ShouldBindJSON(&todo); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "Invalid request body",
@@ -77,9 +78,17 @@ func CreateTodo(c *gin.Context) {
 		})
 		return
 	}
-
+	// generate a new UUID for the todo
 	todo.ID = uuid.NewString()
-	todos = append(todos, todo)
+	todo.Completed = false // default to not completed
+
+	if err := db.CreateTodo(todo); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Internal Server Error",
+			"error":   err.Error(),
+		})
+		return
+	}
 
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "Todo created successfully",
@@ -90,25 +99,31 @@ func CreateTodo(c *gin.Context) {
 func DeleteTodo(c *gin.Context) {
 	id := c.Param("id")
 
-	for i, t := range todos {
-		if t.ID == id {
-			todos = append(todos[:i], todos[i+1:]...)
-			c.JSON(http.StatusOK, gin.H{
-				"message": "Todo deleted successfully",
-			})
-			return
-		}
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid ID",
+			"error":   "ID param can not be empty",
+		})
+		return
 	}
 
-	c.JSON(http.StatusNotFound, gin.H{
-		"message": "Todo not found",
+	if err := db.DeleteTodo(id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Internal Server Error",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Todo deleted successfully",
 	})
 }
 
 func UpdateTodo(c *gin.Context) {
 	id := c.Param("id")
 
-	var todo Todos
+	var todo db.UpdateTodoType
 	if err := c.ShouldBindJSON(&todo); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "Invalid request body",
@@ -116,17 +131,15 @@ func UpdateTodo(c *gin.Context) {
 		})
 	}
 
-	for i, t := range todos {
-		if t.ID == id {
-			todos[i] = todo
-			c.JSON(http.StatusOK, gin.H{
-				"message": "Todo updated successfully",
-			})
-			return
-		}
+	if err := db.UpdateTodo(id, todo); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Internal Server Error",
+			"error":   err.Error(),
+		})
+		return
 	}
 
-	c.JSON(http.StatusNotFound, gin.H{
-		"message": "Todo not found",
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Todo updated successfully",
 	})
 }

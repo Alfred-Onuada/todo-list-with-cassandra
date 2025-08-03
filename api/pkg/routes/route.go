@@ -8,7 +8,7 @@ import (
 
 func RegisterRoutes(router *gin.Engine) {
 	// Heatlh check
-	router.GET("/", handlers.HeatlhCheck)
+	router.GET("/", handlers.HealthCheck)
 
 	router.GET("/todos", handlers.GetTodos)
 	router.GET("/todos/:id", handlers.GetTodo)
