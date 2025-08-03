@@ -6,10 +6,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// RegisterRoutes sets up the API routes for the application.
 func RegisterRoutes(router *gin.Engine) {
 	// Heatlh check
 	router.GET("/", handlers.HealthCheck)
 
+	// CRUD operations for todos
 	router.GET("/todos", handlers.GetTodos)
 	router.GET("/todos/:id", handlers.GetTodo)
 

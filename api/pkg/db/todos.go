@@ -8,6 +8,9 @@ import (
 	"github.com/gocql/gocql"
 )
 
+// Priority represents the priority of a todo item.
+// It can be either Important (0) or Casual (1).
+// It is defined as a uint8 type for efficient storage.
 type Priority uint8
 
 var (
@@ -15,6 +18,8 @@ var (
 	PriorityCasual    Priority = 1
 )
 
+// Todo represents a todo item in the database.
+// It includes fields for ID, content, due date, priority, and completion status.
 type Todo struct {
 	ID        string    `json:"id"`
 	Content   string    `json:"content"`
@@ -23,6 +28,7 @@ type Todo struct {
 	Completed bool      `json:"completed"`
 }
 
+// UpdateTodoType is used for updating a todo item.
 type UpdateTodoType struct {
 	Content   *string    `json:"content"`
 	Due       *time.Time `json:"due"`
@@ -30,6 +36,8 @@ type UpdateTodoType struct {
 	Completed *bool      `json:"completed"`
 }
 
+// GetTodos retrieves all todo items from the database.
+// It returns a slice of Todo items or an error if the query fails.
 func GetTodos() (*[]Todo, error) {
 	// create a slice to hold the
 	result := []Todo{}
@@ -52,6 +60,8 @@ func GetTodos() (*[]Todo, error) {
 	return &result, nil
 }
 
+// GetTodoByID retrieves a todo item by its ID from the database.
+// It returns the Todo item if found, or nil if not found, along with an error if any occurs.
 func GetTodoByID(id string) (*Todo, error) {
 	var todo Todo
 
@@ -70,6 +80,8 @@ func GetTodoByID(id string) (*Todo, error) {
 	return &todo, nil
 }
 
+// CreateTodo inserts a new todo item into the database.
+// It takes a Todo struct as input and returns an error if the insertion fails.
 func CreateTodo(todo Todo) error {
 	// insert the todo into the db
 	return db.session.Query(`
@@ -78,6 +90,8 @@ func CreateTodo(todo Todo) error {
 	`, todo.ID, todo.Content, todo.Due, todo.Priority, todo.Completed).Exec()
 }
 
+// DeleteTodo removes a todo item from the database by its ID.
+// It returns an error if the deletion fails.
 func DeleteTodo(id string) error {
 	// delete the todo with the given id
 	return db.session.Query(`
@@ -85,6 +99,9 @@ func DeleteTodo(id string) error {
 	`, id).Exec()
 }
 
+// UpdateTodo updates an existing todo item in the database.
+// It takes an ID and an UpdateTodoType struct containing the fields to update.
+// It returns an error if the update fails or if no fields are provided to update.
 func UpdateTodo(id string, todo UpdateTodoType) error {
 	assignments := []string{}
 	values := []any{}

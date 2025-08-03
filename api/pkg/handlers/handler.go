@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// HealthCheck is a simple handler to check if the API is running.
 func HealthCheck(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": fmt.Sprintf(
@@ -20,6 +21,8 @@ func HealthCheck(c *gin.Context) {
 	})
 }
 
+// GetTodos retrieves all todo items from the database.
+// It returns a JSON response with the list of todos or an error message if something goes wrong
 func GetTodos(c *gin.Context) {
 	// fetch the todos
 	todos, err := db.GetTodos()
@@ -37,6 +40,8 @@ func GetTodos(c *gin.Context) {
 	})
 }
 
+// GetTodo retrieves a single todo item by its ID.
+// It returns a JSON response with the todo item or an error message if something goes wrong
 func GetTodo(c *gin.Context) {
 	id := c.Param("id")
 
@@ -69,6 +74,9 @@ func GetTodo(c *gin.Context) {
 	})
 }
 
+// CreateTodo creates a new todo item in the database.
+// It expects a JSON request body with the todo details.
+// It returns a JSON response with the created todo item or an error message if something goes wrong
 func CreateTodo(c *gin.Context) {
 	var todo db.Todo
 	if err := c.ShouldBindJSON(&todo); err != nil {
@@ -96,6 +104,9 @@ func CreateTodo(c *gin.Context) {
 	})
 }
 
+// DeleteTodo deletes a todo item by its ID.
+// It returns a JSON response indicating success or failure.
+// If the ID is invalid or the todo item does not exist, it returns an appropriate error message.
 func DeleteTodo(c *gin.Context) {
 	id := c.Param("id")
 
@@ -120,6 +131,9 @@ func DeleteTodo(c *gin.Context) {
 	})
 }
 
+// UpdateTodo updates an existing todo item in the database.
+// It expects a JSON request body with the fields to update.
+// It returns a JSON response indicating success or failure.
 func UpdateTodo(c *gin.Context) {
 	id := c.Param("id")
 

@@ -18,6 +18,12 @@ type DBConnection struct {
 
 var db *DBConnection
 
+// Connect initializes the connection to the Cassandra database.
+// It ensures the keyspace exists and runs any necessary migrations.
+// It should be called once at the start of the application. It will panic if it fails to connect or run migrations.
+// Example usage:
+//
+//	db.Connect()
 func Connect() {
 	keyspace := "todos_db"
 	dbAddress := os.Getenv("CASSANDRA_HOST")
@@ -43,6 +49,7 @@ func Connect() {
 	fmt.Println("Connected to the Cassandra DB")
 }
 
+// ensureKeySpaceExists checks if the keyspace exists and creates it if it does not.
 func ensureKeySpaceExists(dbAddress string, keyspace string) {
 	connection := gocql.NewCluster(dbAddress)
 	connection.Consistency = gocql.Quorum
@@ -62,6 +69,10 @@ func ensureKeySpaceExists(dbAddress string, keyspace string) {
 	}
 }
 
+// runMigrations applies the database migrations using the migrate package.
+// It connects to the Cassandra database and applies all migrations found in the specified source URL.
+// The source URL points to the directory containing migration files.
+// It will log an error and exit if it fails to create the migrate instance or apply migrations
 func runMigrations(dbAddress string, keyspace string) {
 	// file holding the migrations
 	sourceURL := "file://./pkg/db/migrations"
