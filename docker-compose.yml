@@ -4,13 +4,13 @@ services:
       context: ./api
       dockerfile: Dockerfile
     environment:
-      - API_PORT=9990
       - CASSANDRA_HOST=cassandra
+      - API_PORT=${API_PORT}
     depends_on:
       cassandra:
         condition: service_healthy
     ports:
-      - "9990:9990"
+      - "${API_PORT}:9990"
     volumes:
       - ./api:/api
 
@@ -28,4 +28,5 @@ services:
 
 networks:
   default:
-    driver: bridge 
+    driver: bridge
+

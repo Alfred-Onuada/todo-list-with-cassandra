@@ -1,5 +1,5 @@
 # Start with the go Image
-FROM golang:1.24-alpine
+FROM golang:1.25
 
 # Set the working directory
 WORKDIR /api

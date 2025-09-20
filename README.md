@@ -1,4 +1,3 @@
-
 # Todo List API with Go and Cassandra
 
 This project is a simple RESTful API for managing a to-do list, built with Go and using Apache Cassandra as its database. The API provides basic CRUD (Create, Read, Update, Delete) functionality for to-do items.
@@ -24,16 +23,20 @@ The application is designed to be a straightforward example of a service that in
 To run the application, you need to have Docker and Docker Compose installed on your machine.
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/Alfred-Onuada/todo-list-with-cassandra.git
    cd todo-list-with-cassandra
    ```
 
 2. **Start the application:**
+
    ```bash
    docker compose up --build
    ```
-   This command will start the API server and the Cassandra database in the foreground. The API will be available at `http://localhost:9990`.
+
+You need to provide and `API_PORT` environment variable
+This command will start the API server and the Cassandra database in the foreground. The API will be available at `http://localhost:9990`.
 
 ## API Endpoints
 
@@ -45,4 +48,3 @@ The following endpoints are available:
 - `POST /todos`: Create a new to-do item.
 - `PATCH /todos/:id`: Update an existing to-do item.
 - `DELETE /todos/:id`: Delete a to-do item.
-
